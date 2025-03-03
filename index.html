@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Payment System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #qrcode {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .payment-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .default-upi {
+            color: #999;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .upi-note {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #4CAF50;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UPI Payment System</h1>
+        
+        <div class="form-group">
+            <label for="upiId">UPI ID:</label>
+            <input type="text" id="upiId" placeholder="Enter UPI ID" value="9955102428@okbizaxis">
+            <div class="default-upi">Default: 9955102428@okbizaxis</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="amount">Amount (₹):</label>
+            <input type="number" id="amount" placeholder="Enter amount" min="1">
+        </div>
+        
+        <button onclick="generateQR()">Generate QR Code</button>
+        
+        <div id="qrcode"></div>
+        
+        <div id="paymentStatus" class="payment-status"></div>
+        
+        <div class="upi-note">
+            <p><strong>Note:</strong> Scan the QR code with any UPI app (Google Pay, PhonePe, Paytm, etc.) to make payment.</p>
+        </div>
+    </div>
+
+    <script>
+        // Merchant ID - Using this would require additional integration with Google Pay Business API
+        const merchantId = "BCR2DN4TXTCNNWI2";
+        
+        // Default UPI ID
+        const defaultUpiId = "9955102428@okbizaxis";
+        
+        function generateQR() {
+            const upiId = document.getElementById('upiId').value || defaultUpiId;
+            const amount = document.getElementById('amount').value;
+            
+            if (!amount || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+            
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Generate UPI payment URL
+            // Format: upi://pay?pa=UPI_ID&pn=PAYEE_NAME&am=AMOUNT&cu=INR&tn=TRANSACTION_NOTE
+            const upiUrl = `upi://pay?pa=${upiId}&pn=Merchant&am=${amount}&cu=INR&tn=Payment`;
+            
+            // Generate QR code
+            new QRCode(document.getElementById('qrcode'), {
+                text: upiUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#000',
+                colorLight: '#fff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            // Add click event to QR code for payment simulation
+            setTimeout(() => {
+                document.getElementById('qrcode').addEventListener('click', simulatePayment);
+            }, 500);
+        }
+        
+        function simulatePayment() {
+            // In a real implementation, you would use UPI deep linking or a payment gateway
+            // For this demo, we'll simulate a payment with a timeout
+            
+            const amount = document.getElementById('amount').value;
+            
+            if (confirm(`Confirm payment of ₹${amount}?`)) {
+                const statusDiv = document.getElementById('paymentStatus');
+                statusDiv.innerHTML = "Processing payment...";
+                statusDiv.className = "payment-status";
+                statusDiv.style.display = "block";
+                statusDiv.style.backgroundColor = "#fff3cd";
+                statusDiv.style.color = "#856404";
+                statusDiv.style.border = "1px solid #ffeeba";
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    statusDiv.innerHTML = `Payment of ₹${amount} successful! Thank you for your payment.`;
+                    statusDiv.className = "payment-status success";
+                    
+                    // Show alert
+                    alert(`Payment of ₹${amount} successful! Transaction ID: UPI${Math.random().toString(36).substr(2, 9).toUpperCase()}`);
+                    
+                    // In a real implementation, you would verify the payment with your backend
+                    // and update the transaction status
+                }, 2000);
+            }
+        }
+        
+        // Set default UPI ID
+        window.onload = function() {
+            document.getElementById('upiId').value = defaultUpiId;
+        }
+    </script>
+</body>
+</html>
